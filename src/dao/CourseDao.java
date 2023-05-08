@@ -20,12 +20,14 @@ public class CourseDao {
 		return instance;
 	}
 	
-	public void updateCourse(AcademyCourse course) {
+	public void updateCourse(AcademyCourse course) { //o
 		
 		String sql = "update academy_courses "
 				   + "set "
 				   + "	course_req_cnt = ?, "
-				   + "	course_status = ? "
+				   + "	course_status = ?, "
+				   + "  course_name = ?, "
+				   + "  course_quato = ? "
 				   + "where course_no = ?";
 		
 		try {
@@ -33,7 +35,9 @@ public class CourseDao {
 			PreparedStatement pstmt = con.prepareStatement(sql);
 			pstmt.setInt(1, course.getCourseReqCnt());
 			pstmt.setString(2, course.getStatus());
-			pstmt.setInt(3, course.getCourseNo());
+			pstmt.setString(3, course.getName());
+			pstmt.setInt(4, course.getCourseQuato());
+			pstmt.setInt(5, course.getCourseNo());
 			
 			pstmt.executeUpdate();
 			
@@ -48,7 +52,7 @@ public class CourseDao {
 	
 	
 	//dto대신 map list사용..!
-	public List<Map<String, Object>> getCourses (String status) {
+	public List<Map<String, Object>> getCourses (String status) { //o
 		
 		String sql = "select C.course_no, C.course_quato, C.course_req_cnt, "
 				   + "		 T.teacher_name, C.course_name "
@@ -88,7 +92,8 @@ public class CourseDao {
 	}
 	
 	
-	public AcademyCourse getCousersByNo(int courseNo) {
+	
+	public AcademyCourse getCouserByNo(int courseNo) { // o
 		
 		String sql = "select * "
 				   + "from academy_courses "
@@ -102,7 +107,7 @@ public class CourseDao {
 			pstmt.setInt(1, courseNo);
 			
 			ResultSet rs = pstmt.executeQuery();
-			while(rs.next()) {
+			if(rs.next()) {
 				course = new AcademyCourse();
 				
 				course.setCourseNo(rs.getInt("course_no"));
@@ -125,7 +130,7 @@ public class CourseDao {
 	}
 	
 	
-	public void insertCourse(AcademyCourse course) {
+	public void insertCourse(AcademyCourse course) { //o
 		
 		String sql = "insert into academy_courses "
 				   + "(course_no, course_name, course_quato, teacher_id) "
@@ -189,45 +194,6 @@ public class CourseDao {
 				   
 	}
 	
-	
-	
-	public AcademyCourse getCourseByNo(int courseNo) {
-		
-		String sql = "select * "
-				   + "from academy_courses "
-				   + "where course_no = ? ";
-				   
-		try {
-			AcademyCourse course = null;
-			Connection con = ConnUtils.getConnection();
-			PreparedStatement pstmt = con.prepareStatement(sql);
-			pstmt.setInt(1, courseNo);
-			
-			ResultSet rs = pstmt.executeQuery();
-			
-			while(rs.next()) {
-				course = new AcademyCourse();
-				
-				course.setCourseNo(rs.getInt("course_no"));
-				course.setName(rs.getString("course_name"));
-				course.setCourseQuato(rs.getInt("course_quato"));
-				course.setCourseReqCnt(rs.getInt("course_req_cnt"));
-				course.setStatus(rs.getString("course_status"));
-				course.setCourseCreateDate(rs.getDate("course_create_date"));
-				course.setTeacherId(rs.getString("teacher_id"));
-
-			}
-			rs.close();
-			pstmt.close();
-			con.close();
-			
-			return course;
-			
-		} catch (SQLException ex) {
-			throw new RuntimeException(ex);
-		}
-				   
-	}
 	
 	
 }

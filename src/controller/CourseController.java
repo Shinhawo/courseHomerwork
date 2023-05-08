@@ -1,10 +1,10 @@
 package controller;
 
+import java.sql.Date;
 import java.util.List;
 import java.util.Map;
 
 import dto.CourseDetailDto;
-import dto.RegistrationDto;
 import service.StudentService;
 import service.TeacherService;
 import util.KeyboardReader;
@@ -247,32 +247,45 @@ public class CourseController {
 	public void 학생등록취소() {
 		System.out.println("<< 등록취소 >>");
 		System.out.println("과정등록번호를 입력하여 등록을 취소하세요.");
+		
 		System.out.println("과정등록번호 : ");
 		int regNo = keyboard.readInt();
 		
 		studentService.caceledCourse(regNo, loginUser.getId());
+		
 		System.out.println("### 신청이 취소되었습니다.");
 	}
 	
 	public void 학생신청현황조회() {
-		System.out.println("<< 신청현황조회>>");
+		System.out.println("<< 수강신청현황조회 >>");
 		
-		List<RegistrationDto> dtos = 
-				studentService.getAllMyRegistrations(loginUser.getId());
+		List<Map<String, Object>> registrations 
+						= studentService.getAllMyRegistrations(loginUser.getId());
 		
-		System.out.println("----------------------------------------------------");
-		System.out.println("등록번호\t등록일자\t\t취소여부\t과정명");
-		System.out.println("----------------------------------------------------");
-		
-		for(RegistrationDto dto : dtos) {
-				System.out.print(dto.getRegNo() + "\t");
-				System.out.print(dto.getCreateDate() + "\t");
-				System.out.print(dto.getRegCanceled() + "\t");
-				System.out.println(dto.getCourseName());
+		if(registrations.isEmpty()) {
+			System.out.println("### 수강신청 내역이 존재하지 않습니다.");
+		} else {
+			System.out.println("----------------------------------------------------");
+			System.out.println("등록번호\t등록일자\t\t취소여부\t과정명");
+			System.out.println("----------------------------------------------------");
+			for(Map<String, Object> map : registrations) {
+				int no = (Integer) map.get("no");
+				Date createDate = (Date) map.get("createDate");
+				String cancled = (String) map.get("canceled");
+				String name = (String) map.get("name");
+				
+				System.out.print(no + "\t");
+				System.out.print(createDate + "\t");
+				System.out.print(cancled + "\t");
+				System.out.println(name);
+						
+			}
+			System.out.println("----------------------------------------------------");
 		}
 		
-		System.out.println("----------------------------------------------------");
 	}
+		
+
 	
     public void 강사과정조회() {
 		System.out.println("<< 과정조회 >>");

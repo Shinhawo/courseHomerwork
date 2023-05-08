@@ -7,7 +7,6 @@ import controller.LoginUser;
 import dao.RegistrationsDao;
 import dao.StudentDao;
 import dao.CourseDao;
-import dto.RegistrationDto;
 import vo.AcademyCourse;
 import vo.AcademyCourseRegistration;
 import vo.AcademyStudent;
@@ -75,50 +74,71 @@ public class StudentService {
 	
 	public void registerCourse(int courseNo, String studentId) {
 		
-//		List<AcademyCourseRegistration> savedRegistrations =
-//				registrationsDao.getCourseReg(studentId);
-//		if(savedRegistrations.isEmpty()) {
-//			throw new RuntimeException("등록된 신청정보가 존재하지 않습니다.");
-//		}
-//		
-//		AcademyCourseRegistration savedRegistrations =
-//				registrationsDao.getCourseReg(courseNo,studentId);
+		// 과정정보 존재여부 체크하기
+		AcademyCourse course = courseDao.getCouserByNo(courseNo);
+		if(course == null) {
+			throw new RuntimeException("과정정보가 존재하지 않습니다.");
+		}
 		
-//		if(savedRegistrations.getCourseNo() == courseNo && savedRegistrations.getStudentId() == studentId) {
-//			throw new RuntimeException("신청한 강의를 다시 신청하실 수 없습니다.");
-//		}
-//		
+		// 과정상태 체크 (모집종료된 강의를 신청하면 어떡하냐고~~~!!)
+		if(!"모집중".equals(course.getStatus())) {
+			throw new RuntimeException("현재 모집중인 과정이 아닙니다.");
+		}
 		
+		// 중복신청여부 체크하기
+		AcademyCourseRegistration reg 
+							= registrationsDao.getCourseReg(courseNo, studentId);
+		if(reg != null) {
+			throw new RuntimeException("이미 수강신청(취소)된 과정입니다.");
+		}
+		
+		// 수강신청정보 저장
 		registrationsDao.insertCourseReg(courseNo, studentId);
-		
-		AcademyCourse course = courseDao.getCousersByNo(courseNo);
+				
+		//개설과정정보 업데이트 (신청자수, 과정상태)
 		int courseReqCnt = course.getCourseReqCnt() + 1;
 		course.setCourseReqCnt(courseReqCnt);
 		course.setStatus(course.getStatus());
 		if(courseReqCnt == course.getCourseQuato()) {
 			course.setStatus("모집완료");
 		}
-
+		
 		courseDao.updateCourse(course);
-
 	}
 
 	
-	public List<RegistrationDto> getAllMyRegistrations(String studentId){
+	public List<Map<String, Object>> getAllMyRegistrations(String studentId){
 		
-		return registrationsDao.getCourseRegDto(studentId);
+		return registrationsDao.getCourseReg(studentId);
 	}
 	
 	
 	public void caceledCourse(int regNo, String studentId) {
 		
-		AcademyCourseRegistration registration = registrationsDao.getCourseReg(regNo, studentId);
+		// 등록정보 조회, 존재여부 체크
+		AcademyCourseRegistration registration = registrationsDao.getRegistrationByRegNo(regNo);
+		if(registration == null) {
+			throw new RuntimeException("등록정보가 존재하지 않습니다.");
+		}
+		
+		// 이미 수강취소된 과정인지 체크
+		if("Y".equals(registration.getRegCanceled())) {
+			throw new RuntimeException("이미 수강취소처리된 과정입니다.");
+		}
+
+		// 등록정보가 로그인한 학생의 등록정보인지 체크
+		if(!studentId.equals(registration.getStudentId())) {
+			throw new RuntimeException("본인이 신청한 과정만 수강취소할 수 있습니다.");
+		}
+		
+		// 등록정보의 취소여부를 'Y'로 변경
 		registration.setRegCanceled("Y");
 		registrationsDao.updateRegistraion(registration);
 		
-		AcademyCourse course = new AcademyCourse();
+		// 개설과정의 신청자수와 상태변경
+		AcademyCourse course = courseDao.getCouserByNo(registration.getCourseNo());
 		course.setCourseReqCnt(course.getCourseReqCnt() - 1);
-		if(course.getStatus() == "모집완료") {
+		if("모집완료".equals(course.getStatus())) {
 			course.setStatus("모집중");
 		}
 		courseDao.updateCourse(course);

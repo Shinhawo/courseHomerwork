@@ -5,9 +5,10 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
-import dto.RegistrationDto;
 import util.ConnUtils;
 import vo.AcademyCourseRegistration;
 
@@ -19,30 +20,31 @@ public class RegistrationsDao {
 		return instance;
 	}
 	
-	public List<RegistrationDto> getCourseRegDto(String studentId) {
+	public List<Map<String, Object>> getCourseReg(String studentId) { //o
 		
 		String sql = "select R.reg_no, R.reg_create_date, R.reg_canceled, "
 				   + "C.course_name "
 				   + "from academy_course_registrations R, academy_courses C "
 				   + "where R.student_id = ? "
-				   + "and R.course_no = C.course_no ";
+				   + "and R.course_no = C.course_no "
+				   + "order by R.reg_no asc ";
 		
 		try {
-			List<RegistrationDto> registrations = new ArrayList<>();
+			List<Map<String, Object>> registrations = new ArrayList<>();
 			Connection con = ConnUtils.getConnection();
 			PreparedStatement pstmt = con.prepareStatement(sql);
 			pstmt.setString(1, studentId);
 			
 			ResultSet rs = pstmt.executeQuery();
-			
 			while(rs.next()) {
-				RegistrationDto dto = new RegistrationDto();
-				dto.setRegNo(rs.getInt("reg_no"));
-				dto.setCreateDate(rs.getDate("reg_create_date"));
-				dto.setRegCanceled(rs.getString("reg_canceled"));
-				dto.setCourseName(rs.getString("course_name"));
+				Map<String, Object> map = new HashMap<>();
 				
-				registrations.add(dto);
+				map.put("no", rs.getInt("reg_no"));
+				map.put("createDate", rs.getDate("reg_create_date"));
+				map.put("canceled", rs.getString("reg_canceled"));
+				map.put("name", rs.getString("course_name"));
+				
+				registrations.add(map);
 			}
 			
 			rs.close();
@@ -93,22 +95,22 @@ public class RegistrationsDao {
 //	}
 //	
 
-	public AcademyCourseRegistration getCourseReg(int regNo, String studentId) {
+	public AcademyCourseRegistration getCourseReg(int courseNo, String studentId) { // o
 		
 		String sql = "select * "
 				   + "from academy_course_registrations "
 				   + "where student_id = ? "
-				   + "and reg_No = ? ";
+				   + "and course_No = ? ";
 		
 		try {
 			AcademyCourseRegistration registration = null;
+			
 			Connection con = ConnUtils.getConnection();
 			PreparedStatement pstmt = con.prepareStatement(sql);
 			pstmt.setString(1, studentId);
-			pstmt.setInt(2, regNo);
+			pstmt.setInt(2, courseNo);
 			
 			ResultSet rs = pstmt.executeQuery();
-			
 			while(rs.next()) {
 				registration = new AcademyCourseRegistration();
 				registration.setRegNo(rs.getInt("reg_no"));
@@ -118,18 +120,20 @@ public class RegistrationsDao {
 				registration.setCreateDate(rs.getDate("reg_create_date"));
 			
 			}
-			
 			rs.close();
 			pstmt.close();
 			con.close();
 			
 			return registration;
+			
 		} catch (SQLException ex) {
 			throw new RuntimeException(ex);
 		}
 	}
 	
-	public void insertCourseReg(int courseNo, String studentId) {
+	
+	
+	public void insertCourseReg(int courseNo, String studentId) { //o
 		
 		String sql = "insert into academy_course_registrations "
 				   + "(reg_no, student_id, course_no) "
@@ -154,20 +158,18 @@ public class RegistrationsDao {
 	}
 	
 	
-	public void updateRegistraion(AcademyCourseRegistration registration) {
+	public void updateRegistraion(AcademyCourseRegistration registration) { //o
 		
 		String sql = "update academy_course_registrations "
 				   + "set "
 				   + "	reg_canceled = ? "
-				   + "where reg_no = ? "
-				   + "and student_id = ?";
+				   + "where reg_no = ? ";
 		
 		try {
 			Connection con = ConnUtils.getConnection();
 			PreparedStatement pstmt = con.prepareStatement(sql);
 			pstmt.setString(1, registration.getRegCanceled());
 			pstmt.setInt(2, registration.getRegNo());
-			pstmt.setString(3, registration.getStudentId());
 
 			pstmt.executeUpdate();
 			
@@ -177,6 +179,45 @@ public class RegistrationsDao {
 		} catch (SQLException ex) {
 			throw new RuntimeException(ex);
 		}
+	}
+	
+	
+	
+	public AcademyCourseRegistration getRegistrationByRegNo(int regNo) { // o
+		
+		String sql = "select * "
+				   + "from academy_course_registrations "
+				   + "where reg_no = ? ";
+		
+		try {
+			AcademyCourseRegistration registration = null;
+			
+			Connection con = ConnUtils.getConnection();
+			PreparedStatement pstmt = con.prepareStatement(sql);
+			pstmt.setInt(1,regNo);
+			
+			ResultSet rs = pstmt.executeQuery();
+			
+			while(rs.next()) {
+				registration = new AcademyCourseRegistration();
+				registration.setRegNo(rs.getInt("reg_no"));
+				registration.setStudentId(rs.getString("student_id"));
+				registration.setCourseNo(rs.getInt("course_no"));
+				registration.setRegCanceled(rs.getString("reg_canceled"));
+				registration.setCreateDate(rs.getDate("reg_create_date"));
+			
+			}
+			
+			rs.close();
+			pstmt.close();
+			con.close();
+			
+			return registration;
+			
+		} catch (SQLException ex) {
+			throw new RuntimeException(ex);
+		}
+		
 	}
 	
 	
@@ -214,4 +255,6 @@ public class RegistrationsDao {
 			throw new RuntimeException(ex);
 		}
 	}
+	
+	
 }

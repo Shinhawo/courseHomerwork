@@ -83,7 +83,7 @@ public class TeacherService {
 	
 	public void courseCancele(int courseNo) {
 		
-		AcademyCourse course = courseDao.getCourseByNo(courseNo);
+		AcademyCourse course = courseDao.getCouserByNo(courseNo);
 		if(course == null) {
 			throw new RuntimeException("["+courseNo+"]번은 존재하지 않는 과정번호입니다.");
 		}
@@ -106,7 +106,7 @@ public class TeacherService {
 	
 	public CourseDetailDto getCourseDetail(int courseNo, String teacherId) {
 		
-		AcademyCourse course = courseDao.getCourseByNo(courseNo);
+		AcademyCourse course = courseDao.getCouserByNo(courseNo);
 		
 		if(course == null) {
 			throw new RuntimeException("존재하지 않는 과정입니다.");
