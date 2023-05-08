@@ -27,7 +27,7 @@ public class CourseDao {
 				   + "	course_req_cnt = ?, "
 				   + "	course_status = ?, "
 				   + "  course_name = ?, "
-				   + "  course_quato = ? "
+				   + "  course_quota = ? "
 				   + "where course_no = ?";
 		
 		try {
@@ -54,7 +54,7 @@ public class CourseDao {
 	//dto대신 map list사용..!
 	public List<Map<String, Object>> getCourses (String status) { //o
 		
-		String sql = "select C.course_no, C.course_quato, C.course_req_cnt, "
+		String sql = "select C.course_no, C.course_quota, C.course_req_cnt, "
 				   + "		 T.teacher_name, C.course_name "
 				   + "from academy_courses C, academy_teacher T "
 				   + "where C.course_status = ? "
@@ -73,7 +73,7 @@ public class CourseDao {
 				Map<String , Object> map = new HashMap<>();
 				
 				map.put("courseNo", rs.getInt("course_no"));
-				map.put("courseQuato", rs.getInt("course_quato"));
+				map.put("courseQuato", rs.getInt("course_quota"));
 				map.put("courseReqCnt", rs.getInt("course_req_cnt"));
 				map.put("teacherName", rs.getString("teacher_name"));
 				map.put("courseName", rs.getString("course_name"));
@@ -112,7 +112,7 @@ public class CourseDao {
 				
 				course.setCourseNo(rs.getInt("course_no"));
 				course.setName(rs.getString("course_name"));
-				course.setCourseQuato(rs.getInt("course_quato"));
+				course.setCourseQuato(rs.getInt("course_quota"));
 				course.setCourseReqCnt(rs.getInt("course_req_cnt"));
 				course.setStatus(rs.getString("course_status"));
 				course.setCourseCreateDate(rs.getDate("course_create_date"));
@@ -133,7 +133,7 @@ public class CourseDao {
 	public void insertCourse(AcademyCourse course) { //o
 		
 		String sql = "insert into academy_courses "
-				   + "(course_no, course_name, course_quato, teacher_id) "
+				   + "(course_no, course_name, course_quota, teacher_id) "
 				   + "values "
 				   + "(courses_seq.nextval, ?, ?, ?)";
 		
@@ -174,7 +174,7 @@ public class CourseDao {
 				
 				course.setCourseNo(rs.getInt("course_no"));
 				course.setName(rs.getString("course_name"));
-				course.setCourseQuato(rs.getInt("course_quato"));
+				course.setCourseQuato(rs.getInt("course_quota"));
 				course.setCourseReqCnt(rs.getInt("course_req_cnt"));
 				course.setStatus(rs.getString("course_status"));
 				course.setCourseCreateDate(rs.getDate("course_create_date"));
