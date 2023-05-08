@@ -1,10 +1,10 @@
 package controller;
 
 import java.util.List;
+import java.util.Map;
 
 import dto.CourseDetailDto;
 import dto.RegistrationDto;
-import dto.courseDto;
 import service.StudentService;
 import service.TeacherService;
 import util.KeyboardReader;
@@ -15,9 +15,9 @@ import vo.AcademyTeacher;
 public class CourseController {
 
 	private KeyboardReader keyboard = new KeyboardReader();
-	private LoginUser loginUser;
-	private StudentService studentService = new StudentService();
-	private TeacherService teacherService = new TeacherService();
+	private LoginUser loginUser; 
+	private StudentService studentService = StudentService.getInstance();
+	private TeacherService teacherService = TeacherService.getInstance();
 	
 	public void menu() {
 		
@@ -31,10 +31,16 @@ public class CourseController {
 					System.out.println("-------------------------------------------------------------");				
 					System.out.println("1.과정조회  2.과정신청  3.등록취소  4.신청현황  5.로그아웃 0.종료");
 					System.out.println("-------------------------------------------------------------");				
+					System.out.println("["+loginUser.getName()+"]님 환영합니다⊹꒰⍢⑅ ꒱꙳");
+					System.out.println("-------------------------------------------------------------");				
+					System.out.println();
 				} else if ("강사".equals(loginUser.getType())) {
 					System.out.println("-------------------------------------------------------------");				
 					System.out.println("1.과정조회  2.과정등록  3.과정취소  4.과정현황  5.로그아웃 0.종료");					
 					System.out.println("-------------------------------------------------------------");				
+					System.out.println("["+loginUser.getName()+"]님 환영합니다⊹꒰⍢⑅ ꒱꙳");
+					System.out.println("-------------------------------------------------------------");				
+					System.out.println();
 				}
 			}
 			System.out.println();
@@ -88,8 +94,6 @@ public class CourseController {
 				
 			}
 			
-			
-			
 		} catch (RuntimeException ex) {
 			System.out.println(ex.getMessage());
 			ex.printStackTrace(System.out);
@@ -112,19 +116,24 @@ public class CourseController {
 	public void 학생로그인() {
 		System.out.println("<< 학생로그인 >>");
 		System.out.println("### 아이디와 비밀번호를 입력하세요.");
+		
 		System.out.println("### 아이디 : ");
 		String id = keyboard.readString();
 		System.out.println("### 비밀번호 : ");
 		String password = keyboard.readString();
 		String type = "학생";
 		
+		// 업무로직 호출
 		loginUser = studentService.login(id,password,type);
-		System.out.println("### 로그인이 완료되었습니다.");
+
+		
+		System.out.println("### 학생 로그인이 완료되었습니다.");
 	}
 	
 	public void 강사로그인() {
 		System.out.println("<< 강사로그인 >>");
 		System.out.println("### 아이디와 비밀번호를 입력하세요.");
+		
 		System.out.println("### 아이디 : ");
 		String id = keyboard.readString();
 		System.out.println("### 비밀번호 : ");
@@ -132,27 +141,29 @@ public class CourseController {
 		String type = "강사";
 		
 		loginUser = teacherService.login(id, password, type);
+		
 		System.out.println("### 로그인이 완료되었습니다.");
 	}
 	
 	public void 학생회원가입() {
 		System.out.println("<< 학생회원가입 >>");
 		System.out.println("### 이름과 아이디, 비밀번호, 전화번호, 이메일을 입력하세요.");
-		System.out.println("### 이름 : ");
-		String name = keyboard.readString();
+		
 		System.out.println("### 아이디 : ");
 		String id = keyboard.readString();
 		System.out.println("### 비밀번호 : ");
 		String password = keyboard.readString();
+		System.out.println("### 이름 : ");
+		String name = keyboard.readString();
 		System.out.println("### 전화번호 : ");
 		String phone = keyboard.readString();
 		System.out.println("### 이메일 : ");
 		String email = keyboard.readString();
 		
 		AcademyStudent student = new AcademyStudent();
-		student.setName(name);
 		student.setId(id);
 		student.setPassword(password);
+		student.setName(name);
 		student.setPhone(phone);
 		student.setEmail(email);
 		
@@ -164,12 +175,13 @@ public class CourseController {
 	public void 강사회원가입() {
 		System.out.println("<< 강사회원가입 >>");
 		System.out.println("### 이름과 아이디, 비밀번호, 전화번호, 이메일, 급여를 입력하세요.");
-		System.out.println("### 이름 : ");
-		String name = keyboard.readString();
+		
 		System.out.println("### 아이디 : ");
 		String id = keyboard.readString();
 		System.out.println("### 비밀번호 : ");
 		String password = keyboard.readString();
+		System.out.println("### 이름 : ");
+		String name = keyboard.readString();
 		System.out.println("### 전화번호 : ");
 		String phone = keyboard.readString();
 		System.out.println("### 이메일 : ");
@@ -194,27 +206,36 @@ public class CourseController {
 		System.out.println("<< 과정조회 >>");
 		System.out.println("### 모집중인 개설과정을 조회합니다.");
 		
-		List<courseDto> dtos = studentService.getAllCourses();
-		
-		System.out.println("----------------------------------------------------");
-		System.out.println("과정번호\t모집정원\t신청자수\t담당강사명\t과정명");
-		System.out.println("----------------------------------------------------");
-		
-		for(courseDto dto : dtos) {
-			System.out.print(dto.getCourseNo() + "\t");
-			System.out.print(dto.getCourseQuato() + "\t");
-			System.out.print(dto.getCourseReqCnt() + "\t");
-			System.out.print(dto.getTeacher_name() + "\t");
-			System.out.println(dto.getCourse_name() );			
+		List<Map<String, Object>> courses = studentService.getAllCourses();
+		if(courses.isEmpty()) {
+			System.out.println("### 등록가능한 과정이 존재하지 않습니다.");
+		} else {
+			System.out.println("----------------------------------------------------");
+			System.out.println("과정번호\t모집정원\t신청자수\t담당강사명\t과정명");
+			System.out.println("----------------------------------------------------");
+			for(Map<String, Object> map : courses) {
+				int no = (Integer)map.get("courseNo");
+				int quato = (Integer)map.get("courseQuato");
+				int ReqCnt = (Integer)map.get("courseReqCnt");
+				String teacherName = (String)map.get("teacherName");
+				String Name = (String)map.get("courseName");
+				
+				System.out.print(no + "\t");
+				System.out.print(quato + "\t");
+				System.out.print(ReqCnt + "\t");
+				System.out.print(teacherName + "\t");
+				System.out.println(Name );
+			}
+			
 		}
-		
+
 		System.out.println("----------------------------------------------------");
-		
 	}
 	
+	
 	public void 학생과정신청() {
-		System.out.println("<< 과정신청 >>");
-		System.out.println("### 과정번호를 입력하여 과정신청을 하세요.");
+		System.out.println("<< 수강신청 >>");
+		System.out.println("### 과정번호를 입력하여 수강신청을 하세요.");
 		System.out.println("### 과정번호 : ");
 		int courseNo = keyboard.readInt();
 		String studentId = loginUser.getId();
@@ -279,6 +300,7 @@ public class CourseController {
 	
 		System.out.println("<< 과정등록 >>");
 		System.out.println("### 과정명과 모집정원을 입력하세요.");
+		
 		System.out.println("### 과정명 : ");
 		String courseName = keyboard.readString();
 		System.out.println("### 모집정원 :");
@@ -289,6 +311,7 @@ public class CourseController {
 		course.setName(courseName);
 		course.setCourseQuato(courseQuato);
 		course.setTeacherId(teacherId);
+		
 		teacherService.registerCourse(course);
 		
 		System.out.println("### 과정 등록이 완료되었습니다.");

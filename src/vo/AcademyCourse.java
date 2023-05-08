@@ -13,6 +13,7 @@ public class AcademyCourse {
 	private String teacherId;
 	
 	public AcademyCourse() {}
+	
 
 	public int getCourseNo() {
 		return courseNo;
@@ -70,7 +71,11 @@ public class AcademyCourse {
 		this.teacherId = teacherId;
 	}
 	
-	
-	
+	@Override
+	public String toString() {
+		return "AcademyCourse [courseNo=" + courseNo + ", name=" + name + ", courseQuato=" + courseQuato
+				+ ", courseReqCnt=" + courseReqCnt + ", status=" + status + ", courseCreateDate=" + courseCreateDate
+				+ ", teacherId=" + teacherId + "]";
+	}	
 	
 }

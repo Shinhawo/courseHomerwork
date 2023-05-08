@@ -1,4 +1,4 @@
-package dao;
+package minsun;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -9,21 +9,17 @@ import util.ConnUtils;
 import vo.AcademyTeacher;
 
 public class TeacherDao {
-
+	
 	private static TeacherDao instance = new TeacherDao();
-	private TeacherDao () {}
+	private TeacherDao() {}
 	public static TeacherDao getInstance() {
 		return instance;
 	}
-	
-	
-	public AcademyTeacher getTeacherById(String teacherId) {
-		
-		String sql = "select teacher_id, teacher_password, teacher_name, "
-				   + "teacher_phone, teacher_email, teacher_salary, "
-				   + "teacher_retired, teacher_create_date "
+
+	public AcademyTeacher getteTeacherById(String teacherId) {
+		String sql = "select * "
 				   + "from academy_teacher "
-				   + "where teacher_id = ?";
+				   + "where teacher_id = ? ";
 		
 		try {
 			AcademyTeacher teacher = null;
@@ -33,8 +29,7 @@ public class TeacherDao {
 			pstmt.setString(1, teacherId);
 			
 			ResultSet rs = pstmt.executeQuery();
-			
-			while(rs.next()) {
+			while (rs.next()) {
 				teacher = new AcademyTeacher();
 				
 				teacher.setId(rs.getString("teacher_id"));
@@ -46,24 +41,24 @@ public class TeacherDao {
 				teacher.setRetired(rs.getString("teacher_retired"));
 				teacher.setCreateDate(rs.getDate("teacher_create_date"));
 			}
- 			
+			
 			rs.close();
 			pstmt.close();
 			con.close();
 			
 			return teacher;
+			
 		} catch (SQLException ex) {
 			throw new RuntimeException(ex);
 		}
 	}
 	
-	public AcademyTeacher getTeacherByEmail(String teacherEmail) {
-		
-		String sql = "select teacher_id, teacher_password, teacher_name, "
-				   + "teacher_phone, teacher_email, teacher_salary, "
-				   + "teacher_retired, teacher_create_date "
+	
+	
+	public AcademyTeacher getteTeacherByEmail(String teacherEmail) {
+		String sql = "select * "
 				   + "from academy_teacher "
-				   + "where teacher_email = ?";
+				   + "where teacher_email = ? ";
 		
 		try {
 			AcademyTeacher teacher = null;
@@ -73,8 +68,7 @@ public class TeacherDao {
 			pstmt.setString(1, teacherEmail);
 			
 			ResultSet rs = pstmt.executeQuery();
-			
-			while(rs.next()) {
+			while (rs.next()) {
 				teacher = new AcademyTeacher();
 				
 				teacher.setId(rs.getString("teacher_id"));
@@ -86,24 +80,23 @@ public class TeacherDao {
 				teacher.setRetired(rs.getString("teacher_retired"));
 				teacher.setCreateDate(rs.getDate("teacher_create_date"));
 			}
- 			
+			
 			rs.close();
 			pstmt.close();
 			con.close();
 			
 			return teacher;
+			
 		} catch (SQLException ex) {
 			throw new RuntimeException(ex);
 		}
 	}
 	
-	
-	public void insertTeacher (AcademyTeacher teacher) {
-		
+	public void insertTeacher(AcademyTeacher teacher) {
 		String sql = "insert into academy_teacher "
-				   + "(teacher_id, teacher_password, teacher_name, teacher_phone, teacher_email, teacher_salary) "
-                   + "values "
-				   + "(?,?,?,?,?,?)";
+				   + "(teacher_id, teacher_password, teacher_name, teacher_email, teacher_phone, teacher_salary)"
+				   + "values "
+				   + "(?, ?, ?, ?, ?, ?)";
 		
 		try {
 			Connection con = ConnUtils.getConnection();
@@ -112,8 +105,8 @@ public class TeacherDao {
 			pstmt.setString(1, teacher.getId());
 			pstmt.setString(2, teacher.getPassword());
 			pstmt.setString(3, teacher.getName());
-			pstmt.setString(4, teacher.getPhone());
-			pstmt.setString(5, teacher.getEmail());
+			pstmt.setString(4, teacher.getEmail());
+			pstmt.setString(5, teacher.getPhone());
 			pstmt.setInt(6, teacher.getSalary());
 			
 			pstmt.executeUpdate();

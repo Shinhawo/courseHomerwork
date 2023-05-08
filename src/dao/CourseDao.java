@@ -5,17 +5,20 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicIntegerFieldUpdater;
+import java.util.Map;
 
-import dto.courseDto;
 import util.ConnUtils;
 import vo.AcademyCourse;
 
-public class courseDao {
+public class CourseDao {
 
-	
-	
+	private static CourseDao instance = new CourseDao();
+	private CourseDao() {}
+	public static CourseDao getInstance() {
+		return instance;
+	}
 	
 	public void updateCourse(AcademyCourse course) {
 		
@@ -44,39 +47,41 @@ public class courseDao {
 	
 	
 	
-	public List<courseDto> getCourses () {
+	//dto대신 map list사용..!
+	public List<Map<String, Object>> getCourses (String status) {
 		
 		String sql = "select C.course_no, C.course_quato, C.course_req_cnt, "
-				   + "T.teacher_name, C.course_name "
+				   + "		 T.teacher_name, C.course_name "
 				   + "from academy_courses C, academy_teacher T "
-				   + "where C.course_status = '모집중' "
+				   + "where C.course_status = ? "
 				   + "and C.teacher_id = T.teacher_id "
-				   + "order by course_no ";
+				   + "order by C.course_no asc ";
 		
 		try {
-			List<courseDto> dtos = new ArrayList<>();
+			List<Map<String, Object>> courses = new ArrayList<>();
 			
 			Connection con = ConnUtils.getConnection();
 			PreparedStatement pstmt = con.prepareStatement(sql);
+			pstmt.setString(1, status);
 			
 			ResultSet rs = pstmt.executeQuery();
 			while(rs.next()) {
-				courseDto dto = new courseDto();
+				Map<String , Object> map = new HashMap<>();
 				
-				dto.setCourseNo(rs.getInt("course_no"));
-				dto.setCourseQuato(rs.getInt("course_quato"));
-				dto.setCourseReqCnt(rs.getInt("course_req_cnt"));
-				dto.setTeacher_name(rs.getString("teacher_name"));
-				dto.setCourse_name(rs.getString("course_name"));
+				map.put("courseNo", rs.getInt("course_no"));
+				map.put("courseQuato", rs.getInt("course_quato"));
+				map.put("courseReqCnt", rs.getInt("course_req_cnt"));
+				map.put("teacherName", rs.getString("teacher_name"));
+				map.put("courseName", rs.getString("course_name"));
 				
-				dtos.add(dto);
+				courses.add(map);
 			}
 			
 			rs.close();
 			pstmt.close();
 			con.close();
 			
-			return dtos;
+			return courses;
 		} catch (SQLException ex) {
 			throw new RuntimeException(ex);
 		}
@@ -144,6 +149,7 @@ public class courseDao {
 		}
 	}
 	
+	
 	public List<AcademyCourse> getCourseById(String teacherId) {
 		
 		String sql = "select * "
@@ -182,6 +188,8 @@ public class courseDao {
 		}
 				   
 	}
+	
+	
 	
 	public AcademyCourse getCourseByNo(int courseNo) {
 		

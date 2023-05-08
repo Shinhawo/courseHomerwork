@@ -12,6 +12,15 @@ import vo.AcademyStudent;
 
 public class StudentDao {
 
+	// 내 어플리케이션이 실행되는 동안 studentDao객체는 하나만 만들어진다 -> new 사용 못함
+	// 값을 담는 객체가 아니라 기능이 구현된 객체. 메모리에 하나만 생성된다.
+	// = 싱글턴(Singleton)객체
+	private static StudentDao instance = new StudentDao();
+	private StudentDao () {}
+	public static StudentDao getInstance() {
+		return instance;
+	}
+	
 	public List<AcademyStudent> getStudentByCourseNo(int courseNo){
 		
 		String sql = "select S.student_id, S.student_name, S.student_phone, S.student_email "
@@ -58,7 +67,6 @@ public class StudentDao {
 				   + "WHERE STUDENT_ID = ? ";
 		
 		try {
-			
 			AcademyStudent student = null;
 			
 			Connection conn = ConnUtils.getConnection();
@@ -66,8 +74,7 @@ public class StudentDao {
 			pstmt.setString(1, studentId);
 			
 			ResultSet rs = pstmt.executeQuery();
-			
-			while(rs.next()) {
+			if (rs.next()) {
 				student = new AcademyStudent();
 				student.setId(rs.getString("student_id"));
 				student.setPassword(rs.getString("student_password"));
@@ -78,7 +85,6 @@ public class StudentDao {
 				student.setCreateDate(rs.getDate("student_create_date"));
 				
 			}
-			
 			rs.close();
 			pstmt.close();
 			conn.close();
@@ -89,6 +95,43 @@ public class StudentDao {
 		}
 	}
 	
+	
+public AcademyStudent getStudentByEmail (String studentEmail) {
+		
+		String sql = "SELECT STUDENT_ID, STUDENT_PASSWORD, STUDENT_NAME, "
+				   + "STUDENT_PHONE, STUDENT_EMAIL, STUDENT_DELETED, "
+				   + "STUDENT_CREATE_DATE "
+				   + "FROM ACADEMY_STUDENTS "
+				   + "WHERE STUDENT_EMAIL = ? ";
+		
+		try {
+			AcademyStudent student = null;
+			
+			Connection conn = ConnUtils.getConnection();
+			PreparedStatement pstmt = conn.prepareStatement(sql);
+			pstmt.setString(1, studentEmail);
+			
+			ResultSet rs = pstmt.executeQuery();
+			if (rs.next()) {
+				student = new AcademyStudent();
+				student.setId(rs.getString("student_id"));
+				student.setPassword(rs.getString("student_password"));
+				student.setName(rs.getString("student_name"));
+				student.setPhone(rs.getString("student_phone"));
+				student.setEmail(rs.getString("student_email"));
+				student.setDeleted(rs.getString("student_deleted"));
+				student.setCreateDate(rs.getDate("student_create_date"));
+				
+			}
+			rs.close();
+			pstmt.close();
+			conn.close();
+ 			
+			return student;
+		} catch (SQLException ex) {
+			throw new RuntimeException(ex);
+		}
+	}
 	
 	
 	public void insertStudent(AcademyStudent student) {
@@ -107,12 +150,10 @@ public class StudentDao {
 			pstmt.setString(3, student.getName());
 			pstmt.setString(4, student.getPhone());
 			pstmt.setString(5, student.getEmail());
-			
 			pstmt.executeUpdate();
 			
 			pstmt.close();
 			conn.close();
-			
 			
 		} catch (SQLException ex) {
 			throw new RuntimeException(ex);

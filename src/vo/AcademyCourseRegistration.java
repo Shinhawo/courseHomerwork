@@ -51,6 +51,11 @@ public class AcademyCourseRegistration {
 	public void setCreateDate(Date createDate) {
 		this.createDate = createDate;
 	}
-	
+
+	@Override
+	public String toString() {
+		return "AcademyCourseRegistration [regNo=" + regNo + ", studentId=" + studentId + ", courseNo=" + courseNo
+				+ ", regCanceled=" + regCanceled + ", createDate=" + createDate + "]";
+	}
 	
 }

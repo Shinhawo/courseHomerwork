@@ -13,6 +13,11 @@ import vo.AcademyCourseRegistration;
 
 public class RegistrationsDao {
 	
+	private static RegistrationsDao instance = new RegistrationsDao();
+	private RegistrationsDao() {}
+	public static RegistrationsDao getInstance() {
+		return instance;
+	}
 	
 	public List<RegistrationDto> getCourseRegDto(String studentId) {
 		

@@ -3,14 +3,14 @@ package controller;
 public class LoginUser {
 
 	private String id;
-	private String name;
 	private String password;
+	private String name;
 	private String type;	// 학생 혹은 강사
 	
-	public LoginUser(String id, String name, String password, String type) {
+	public LoginUser(String id, String password, String name, String type) {
 		this.id = id;
-		this.name = name;
 		this.password = password;
+		this.name = name;
 		this.type = type;
 	}
 
@@ -33,10 +33,11 @@ public class LoginUser {
 	public String getName() {
 		return name;
 	}
-
+	
 	public void setName(String name) {
 		this.name = name;
 	}
+	
 
 	public String getType() {
 		return type;

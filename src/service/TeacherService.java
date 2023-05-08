@@ -3,12 +3,11 @@ package service;
 import java.util.List;
 
 import controller.LoginUser;
+import dao.CourseDao;
 import dao.RegistrationsDao;
 import dao.StudentDao;
 import dao.TeacherDao;
-import dao.courseDao;
 import dto.CourseDetailDto;
-import dto.RegistrationDto;
 import vo.AcademyCourse;
 import vo.AcademyCourseRegistration;
 import vo.AcademyStudent;
@@ -16,18 +15,28 @@ import vo.AcademyTeacher;
 
 public class TeacherService {
 
-	private TeacherDao teacherDao = new TeacherDao();
-	private courseDao courseDao = new courseDao();
-	private RegistrationsDao registrationsDao = new RegistrationsDao();
-	private StudentDao studentDao = new StudentDao();
+	private static TeacherService instance = new TeacherService();
+	private TeacherService() {}
+	public static TeacherService getInstance() {
+		return instance;
+	}
+	
+	private TeacherDao teacherDao = TeacherDao.getInstance();
+	private CourseDao courseDao = CourseDao.getInstance();
+	private RegistrationsDao registrationsDao = RegistrationsDao.getInstance();
+	private StudentDao studentDao = StudentDao.getInstance();
 	
 	
 	public void registerTeacher(AcademyTeacher teacher) {
 		
 		AcademyTeacher savedTeacher = teacherDao.getTeacherById(teacher.getId());
-		
 		if(savedTeacher != null) {
 			System.out.println("["+savedTeacher.getId()+"]는 이미 사용중인 아이디 입니다.");
+		}
+		
+		AcademyTeacher savedEmail = teacherDao.getTeacherByEmail(teacher.getEmail());
+		if(savedEmail != null) {
+			throw new RuntimeException("["+teacher.getEmail()+"]는 이미 사용중인 이메일 입니다.");
 		}
 		
 		teacherDao.insertTeacher(teacher);
@@ -41,12 +50,18 @@ public class TeacherService {
 			throw new RuntimeException("가입되어 있지 않은 아이디 입니다.");
 		}
 		
+		// 탈퇴한 수강생인지 체크하기
+		if("Y".equals(savedTeacher.getRetired())) {
+			throw new RuntimeException("삭제된 아이디입니다.");
+		}
+		
 		if(!savedTeacher.getPassword().equals(password)) {
 			throw new RuntimeException("비밀번호가 일치하지 않습니다.");
 		}
 		
 		return new LoginUser(savedTeacher.getId(), savedTeacher.getPassword(), savedTeacher.getName(), type);
 	}
+	
 	
 	
 	public void registerCourse(AcademyCourse course) {
@@ -97,8 +112,8 @@ public class TeacherService {
 			throw new RuntimeException("존재하지 않는 과정입니다.");
 		}
 		
-		if(course.getTeacherId() != teacherId) {
-			System.out.println("다른 강사의 개설과정은 조회할 수 없습니다.");
+		if(!teacherId.equals(course.getTeacherId())) {
+			throw new RuntimeException("다른 강사의 개설과정은 조회할 수 없습니다.");		
 		}
 		
 		List<AcademyStudent> students = 
